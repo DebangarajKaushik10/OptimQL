@@ -16,7 +16,7 @@ export default function App() {
     executionTime: '0ms',
     rowsScanned: '0',
     improvement: '0%',
-    complexity: 'N/A',
+    confidence: 'N/A',
   })
 
   const exampleQuery = `SELECT * FROM users u
@@ -47,21 +47,33 @@ AND o.status = 'completed'`
       }
       const result = await res.json()
 
-      // Map backend result to UI state (attempt best-effort)
+      // Map backend response fields to UI state
+      const suggestedQuery = result.suggested_query || ''
+      const improvementPct = result.improvement_percentage || 0
+      const confidenceScore = result.confidence_score || 0
+      const details = result.details || ''
+
+      const isRejected = suggestedQuery === 'N/A'
+      const hasImprovement = improvementPct > 0 && !isRejected
+
       setSuggestions([
         {
-          type: result.best_suggestion ? 'success' : 'info',
-          title: result.best_suggestion ? 'Index suggested' : 'No index suggested',
-          description: result.details || '',
+          type: isRejected ? 'warning' : hasImprovement ? 'success' : 'info',
+          title: isRejected
+            ? 'Query Rejected'
+            : hasImprovement
+              ? 'Optimization Found'
+              : 'No Improvement Found',
+          description: details,
         },
       ])
 
-      setOptimizedQuery(result.best_suggestion || '')
+      setOptimizedQuery(isRejected ? '' : suggestedQuery)
       setMetrics({
-        executionTime: `${result.baseline_time_ms || 'N/A'} ms`,
-        rowsScanned: result.rows_scanned || 'N/A',
-        improvement: `${result.improvement_percentage || 0}%`,
-        complexity: 'Unknown',
+        executionTime: improvementPct > 0 ? `${improvementPct.toFixed(1)}% faster` : 'N/A',
+        rowsScanned: 'N/A',
+        improvement: `${improvementPct.toFixed(1)}%`,
+        confidence: `${(confidenceScore * 100).toFixed(0)}%`,
       })
 
       setHasResults(true)

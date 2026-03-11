@@ -24,13 +24,29 @@ st.markdown(
 st.title("Optimize your SQL queries")
 st.caption("Analyze and improve database query performance with Python-powered optimization")
 
+# --- Handle "Load example" BEFORE the widget is rendered ---
+EXAMPLE_QUERY = (
+    "SELECT * FROM users u\n"
+    "JOIN orders o ON u.id = o.user_id\n"
+    "WHERE u.created_at > '2024-01-01' AND o.status = 'completed'"
+)
+if st.session_state.get("_load_example"):
+    st.session_state["query_input"] = EXAMPLE_QUERY
+    st.session_state["_load_example"] = False
+
 # Top-level layout: editor on left, results on right
 editor_col, results_col = st.columns([2, 1])
 
 with editor_col:
     st.subheader("Input Query")
     # Editor area
-    query = st.text_area("", height=300, placeholder="SELECT * FROM users WHERE ...", key="query_input")
+    query = st.text_area(
+        "SQL Query",
+        height=300,
+        placeholder="SELECT * FROM users WHERE ...",
+        key="query_input",
+        label_visibility="collapsed",
+    )
 
     # Small status row
     line_count = len(query.splitlines()) if query else 0
@@ -41,7 +57,8 @@ with editor_col:
             st.session_state["_opt_now"] = True
     with cols[1]:
         if st.button("Load example"):
-            st.session_state["query_input"] = "SELECT * FROM users u\nJOIN orders o ON u.id = o.user_id\nWHERE u.created_at > '2024-01-01' AND o.status = 'completed'"
+            st.session_state["_load_example"] = True
+            st.rerun()
     with cols[2]:
         if query:
             st.markdown(f"<div class='line-count'>{line_count} lines · {char_count} chars</div>", unsafe_allow_html=True)

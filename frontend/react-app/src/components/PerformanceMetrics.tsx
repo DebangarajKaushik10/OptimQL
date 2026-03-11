@@ -1,11 +1,11 @@
 import React from 'react'
-import { TrendingDown, Clock, Database, Zap } from 'lucide-react'
+import { TrendingDown, Clock, Database, ShieldCheck } from 'lucide-react'
 
 export interface Metrics {
   executionTime: string
   rowsScanned: string
   improvement: string
-  complexity: string
+  confidence: string
 }
 
 interface PerformanceMetricsProps {
@@ -41,10 +41,10 @@ export function PerformanceMetrics({ metrics }: PerformanceMetricsProps) {
 
       <div className="border border-zinc-800 p-6 bg-zinc-950/50">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="h-4 w-4 text-zinc-400" />
-          <div className="text-xs text-zinc-400 uppercase tracking-wider">Complexity</div>
+          <ShieldCheck className="h-4 w-4 text-zinc-400" />
+          <div className="text-xs text-zinc-400 uppercase tracking-wider">Confidence</div>
         </div>
-        <div className="text-2xl font-light text-zinc-100">{metrics.complexity}</div>
+        <div className="text-2xl font-light text-zinc-100">{metrics.confidence}</div>
       </div>
     </div>
   )

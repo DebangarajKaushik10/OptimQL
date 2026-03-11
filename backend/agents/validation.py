@@ -76,7 +76,7 @@ class ValidationAgent:
                 # we may need to run those statements in autocommit mode. Use the
                 # execute_autocommit helper when necessary.
                 needs_trgm = "gin_trgm_ops" in exec_suggestion.lower()
-                needs_concurrent = bool(re.search(r"\\bCONCURRENTLY\\b", exec_suggestion, re.IGNORECASE))
+                needs_concurrent = bool(re.search(r"\bCONCURRENTLY\b", exec_suggestion, re.IGNORECASE))
 
                 if needs_trgm:
                     try:

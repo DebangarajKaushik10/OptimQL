@@ -9,7 +9,7 @@ from backend.agents.optimization import OptimizationAgent
 
 q = "SELECT * FROM products WHERE name LIKE '%phone%';"
 ana = AnalysisAgent()
-metrics = ana = ana = ana = AnalysisAgent().analyze(q)
+metrics = AnalysisAgent().analyze(q)
 opt = OptimizationAgent()
 suggestions = opt.optimize(q, metrics)
 print('Analysis metrics:')
