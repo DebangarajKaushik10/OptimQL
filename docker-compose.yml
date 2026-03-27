@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  main-db:
+    image: postgres:15-alpine
+    container_name: optimql-main-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: main_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - main-db-data:/var/lib/postgresql/data
+
+  shadow-db:
+    image: postgres:15-alpine
+    container_name: optimql-shadow-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shadow_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - shadow-db-data:/var/lib/postgresql/data
+
+volumes:
+  main-db-data:
+  shadow-db-data:
