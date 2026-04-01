@@ -3,4 +3,16 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { background: #000; color: #e5e7eb; }
+body { 
+  background-color: #080C14;
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(124, 58, 237, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 40%),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
+  background-attachment: fixed;
+  color: #fafafa; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
