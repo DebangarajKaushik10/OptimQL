@@ -4,12 +4,12 @@ from pydantic import BaseModel
 from typing import Optional
 import logging
 from backend.agents.orchestrator import OrchestratorAgent
+from backend.history_db import init_history_db, insert_history, get_history, get_cached_result
 
 app = FastAPI(title="OptimQL API", description="Autonomous Multi-Agent AI Database Optimizer API")
 
-# Simple in-memory cache mapping normalized query to result 
-# This ensures consistent metrics across multiple clicks
-query_cache = {}
+# Initialize SQLite database for history tracking
+init_history_db()
 
 # CORS: allow local frontend dev servers (Vite/React)
 origins = [
@@ -50,18 +50,43 @@ async def analyze_query(request: SQLQueryRequest):
     try:
         normalized_query = request.query.strip()
         
-        # Return cached result if we've already optimized this exact query recently
-        if normalized_query in query_cache:
-            logging.info("Returning cached result to maintain consistency.")
-            return OptimizationResult(**query_cache[normalized_query])
+        # Check SQLite db for matching original query
+        cached_run = get_cached_result(normalized_query)
+        if cached_run:
+            logging.info("Returning cached result from SQLite db.")
+            return OptimizationResult(
+                original_query=cached_run["original_query"],
+                suggested_query=cached_run["suggested_query"],
+                improvement_percentage=cached_run["improvement_pct"],
+                confidence_score=cached_run["confidence_score"],
+                details=cached_run["details"],
+                baseline_time_ms=cached_run["baseline_time_ms"],
+                rows_scanned=cached_run["rows_scanned"]
+            )
 
         orchestrator = OrchestratorAgent()
         result = orchestrator.process(normalized_query)
 
-        # Save to cache
-        query_cache[normalized_query] = result
+        # Save to SQLite history
+        insert_history(
+            original_query=result["original_query"],
+            suggested_query=result["suggested_query"],
+            improvement_pct=result["improvement_percentage"],
+            confidence_score=result["confidence_score"],
+            baseline_time_ms=result.get("baseline_time_ms"),
+            rows_scanned=result.get("rows_scanned"),
+            details=result["details"]
+        )
 
         return OptimizationResult(**result)
     except Exception as e:
         logging.error(f"Error processing query: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/history")
+def read_history():
+    try:
+        return get_history()
+    except Exception as e:
+        logging.error(f"Error fetching history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
